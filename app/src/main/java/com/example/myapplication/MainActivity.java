@@ -20,6 +20,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +39,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private SensorManager mSensorManager;
     private TextView tvAccelerometer, tvGravity, tvGyroscope, tvTime;
-    private Button btAllSensors, btSocket, btStart, btPlay, btTime;
+    private Button btAllSensors, btSocket, btStart, btPlay, btTime, btStartTime;
+    private EditText etStartTime;
     private boolean startClickFlag = true;
     private String fileName = "null";
     private MediaRecorder mSoundRecorder;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private SharedPreferences sp;
     private double avgDeltaTime;
+    private int startM;
 
     public String newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -115,7 +118,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) {
                 if(startClickFlag){
                     btStart.setText("STOP");
+                    btStartTime.setText("STOP");
                     btStart.setBackgroundColor(Color.parseColor(color2));
+                    btStartTime.setBackgroundColor(Color.parseColor(color2));
 
                     mSoundRecorder = new MediaRecorder();
                     mSoundRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -132,7 +137,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 else{
                     btStart.setText("START");
+                    btStartTime.setText("START2");
                     btStart.setBackgroundColor(Color.parseColor(color1));
+                    btStartTime.setBackgroundColor(Color.parseColor(color1));
 
                     mSoundRecorder.stop();
                     mSoundRecorder.release();
@@ -192,6 +199,56 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
         });
+
+        etStartTime = (EditText)findViewById(R.id.etStartTime);
+        btStartTime = (Button)findViewById(R.id.btStartTime);
+        btStartTime.setBackgroundColor(Color.parseColor(color1));
+        btStartTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startM = Integer.parseInt(etStartTime.getText().toString().trim());
+                while(true){
+                    Calendar calendar = Calendar.getInstance();
+                    int m = calendar.get(Calendar.MINUTE);
+                    int s = calendar.get(Calendar.SECOND);
+                    int ms = calendar.get(Calendar.MILLISECOND);
+                    if(m>=startM && s*1000+ms>=avgDeltaTime) break;
+                }
+
+                if(startClickFlag){
+                    btStart.setText("STOP");
+                    btStartTime.setText("STOP");
+                    btStart.setBackgroundColor(Color.parseColor(color2));
+                    btStartTime.setBackgroundColor(Color.parseColor(color2));
+
+                    mSoundRecorder = new MediaRecorder();
+                    mSoundRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                    mSoundRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                    fileName = newFileName();
+                    mSoundRecorder.setOutputFile(fileName);
+                    mSoundRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                    try {
+                        mSoundRecorder.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    mSoundRecorder.start();
+                }
+                else{
+                    btStart.setText("START");
+                    btStartTime.setText("START2");
+                    btStart.setBackgroundColor(Color.parseColor(color1));
+                    btStartTime.setBackgroundColor(Color.parseColor(color1));
+
+                    mSoundRecorder.stop();
+                    mSoundRecorder.release();
+                    mSoundRecorder = null;
+                }
+                startClickFlag = !startClickFlag;
+
+            }
+        });
+
 
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE); //获取系统传感器服务权限
 

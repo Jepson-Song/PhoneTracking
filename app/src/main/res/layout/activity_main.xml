@@ -104,5 +104,30 @@
         app:layout_constraintStart_toStartOf="@+id/btSocket"
         app:layout_constraintTop_toBottomOf="@+id/btSocket" />
 
+    <EditText
+        android:id="@+id/etStartTime"
+        android:layout_width="0dp"
+        android:layout_height="39dp"
+        android:layout_marginStart="31dp"
+        android:layout_marginLeft="31dp"
+        android:layout_marginEnd="85dp"
+        android:layout_marginRight="85dp"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/btStart"
+        app:layout_constraintEnd_toStartOf="@+id/btStartTime"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btStartTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="68dp"
+        android:layout_marginRight="68dp"
+        android:layout_marginBottom="13dp"
+        android:text="START2"
+        app:layout_constraintBottom_toTopOf="@+id/btPlay"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/etStartTime" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
