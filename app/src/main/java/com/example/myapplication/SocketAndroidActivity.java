@@ -2,7 +2,9 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -45,6 +47,8 @@ public class SocketAndroidActivity extends AppCompatActivity {
     private int deltaTime = -1;
     private double avgDeltaTime = 0;
     //private Timer timer;
+
+    private SharedPreferences sp;
 
 
     @Override
@@ -105,6 +109,19 @@ public class SocketAndroidActivity extends AppCompatActivity {
                 }
                 avgDeltaTime/=n;
                 Toast.makeText(SocketAndroidActivity.this, "avgDeltaTime:"+avgDeltaTime, Toast.LENGTH_SHORT).show();
+
+                /**
+                 * 获取SharedPreferenced对象
+                 * 第一个参数是生成xml的文件名
+                 * 第二个参数是存储的格式（**注意**本文后面会讲解）
+                 */
+                sp = getSharedPreferences("User", Context.MODE_PRIVATE);
+                //获取到edit对象
+                SharedPreferences.Editor editor = sp.edit();
+                //通过editor对象写入数据
+                editor.putString("avgDeltaTime", avgDeltaTime+"");
+                //提交数据存入到xml文件中
+                editor.commit();
 
             }
         });

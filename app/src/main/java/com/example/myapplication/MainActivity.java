@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private SensorManager mSensorManager;
     private TextView tvAccelerometer, tvGravity, tvGyroscope, tvTime;
-    private Button btAllSensors, btSocket, btStart, btPlay;
+    private Button btAllSensors, btSocket, btStart, btPlay, btTime;
     private boolean startClickFlag = true;
     private String fileName = "null";
     private MediaRecorder mSoundRecorder;
@@ -52,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     final String color1 = "#9BA8A8";
     final String color2 = "#00cccc";
     private IntentFilter intentFilter;
+
+    private SharedPreferences sp;
+    private double avgDeltaTime;
 
     public String newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -88,6 +92,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 startActivity(intent);
                 //用一种特殊方式开启Activity
                 //startActivityForResult(intent, 11);
+            }
+        });
+
+        btTime = (Button)findViewById(R.id.btTime);
+        btTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sp = getSharedPreferences("User", Context.MODE_PRIVATE);;
+                String strAvgDeltaTime = sp.getString("avgDeltaTime", "null");
+                avgDeltaTime = Double.valueOf(strAvgDeltaTime);
+                tvTime.setText("avgDeltaTime: "+strAvgDeltaTime);
             }
         });
 
@@ -187,15 +202,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         tvTime = (TextView)findViewById(R.id.tvTime);
 
-
+        /*
         intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_TIME_TICK);//每分钟变化
         intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);//设置了系统时区
         intentFilter.addAction(Intent.ACTION_TIME_CHANGED);//设置了系统时间
         registerReceiver(receiver, intentFilter);
+         */
 
     }
-
+/*
+    //每分钟改变一次
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -209,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
     };
-
+*/
     @Override
     public void onSensorChanged(SensorEvent event){
         switch (event.sensor.getType()){
@@ -261,6 +278,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
                 SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     /**
@@ -276,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onDestroy(){
         super.onDestroy();
         thread = null;
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
     }
 
 }
