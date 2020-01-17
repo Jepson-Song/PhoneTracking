@@ -23,6 +23,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SocketAndroidActivity extends AppCompatActivity {
 
@@ -41,6 +43,8 @@ public class SocketAndroidActivity extends AppCompatActivity {
     int portStr;
 
     private int deltaTime = -1;
+    private double avgDeltaTime = 0;
+    //private Timer timer;
 
 
     @Override
@@ -65,15 +69,42 @@ public class SocketAndroidActivity extends AppCompatActivity {
             }
         });
 
+
+        class DelayTask extends TimerTask {
+            @Override
+            public void run() {
+
+            }
+        }
+
         Button btTest = (Button)findViewById(R.id.btTest);
         btTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addStr = address.getText().toString().trim();
                 portStr = Integer.parseInt(port.getText().toString().trim());
-                long time = getTodayMS();
-                input.setText("TIME:"+time);
-                new WorkThread().start();
+
+                int n = 10;
+                for (int i=1; i<=n ; i++){
+
+                    long time = getTodayMS();
+                    input.setText("TIME:" + time);
+
+                    new WorkThread().start();
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    //Toast.makeText(SocketAndroidActivity.this, "time:"+time, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SocketAndroidActivity.this, "time:"+time+"  deltaTime:"+deltaTime, Toast.LENGTH_SHORT).show();
+                    avgDeltaTime += deltaTime;
+;
+                }
+                avgDeltaTime/=n;
+                Toast.makeText(SocketAndroidActivity.this, "avgDeltaTime:"+avgDeltaTime, Toast.LENGTH_SHORT).show();
 
             }
         });
