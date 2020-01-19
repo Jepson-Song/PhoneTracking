@@ -207,12 +207,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onClick(View v) {
                 startM = Integer.parseInt(etStartTime.getText().toString().trim());
-                while(true){
-                    Calendar calendar = Calendar.getInstance();
-                    int m = calendar.get(Calendar.MINUTE);
-                    int s = calendar.get(Calendar.SECOND);
-                    int ms = calendar.get(Calendar.MILLISECOND);
-                    if(m>=startM && s*1000+ms>=avgDeltaTime) break;
+
+                if(avgDeltaTime < 0) {
+                    startM -= 1;
+                    if(startM < 0) startM = 59;
+                    avgDeltaTime += 60*1000;
+                }
+
+                Calendar calendar;
+                int m, s, ms;
+                while (true) {
+                    calendar = Calendar.getInstance();
+                    m = calendar.get(Calendar.MINUTE);
+                    s = calendar.get(Calendar.SECOND);
+                    ms = calendar.get(Calendar.MILLISECOND);
+                    if (m >= startM && s * 1000 + ms >= avgDeltaTime) break;
                 }
 
                 if(startClickFlag){
