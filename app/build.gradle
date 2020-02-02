@@ -11,15 +11,17 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        ndk {
-            moduleName "MyApplicationJniLibrary"
-            ldLibs "log"
-            abiFilters 'armeabi','arm64-v8a','armeabi-v7a','x86','x86_64'
-        }
-
         sourceSets.main{
-            jni.srcDirs = []
-            jniLibs.srcDir "src/main/libs"
+            jniLibs.srcDirs = ['libs']
+        }
+        ndk{
+            moduleName "demo"			//名字自己取
+            abiFilters "arm64-v8a", "armeabi-v7a", "x86", "x86_64"	//这里是你想生成什么类型的就自己添加
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path 'jni/Android.mk'	//这个是Android.mk文件的路径
         }
     }
     buildTypes {
