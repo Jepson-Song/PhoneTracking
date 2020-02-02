@@ -10,6 +10,17 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            moduleName "MyApplicationJniLibrary"
+            ldLibs "log"
+            abiFilters 'armeabi','arm64-v8a','armeabi-v7a','x86','x86_64'
+        }
+
+        sourceSets.main{
+            jni.srcDirs = []
+            jniLibs.srcDir "src/main/libs"
+        }
     }
     buildTypes {
         release {
@@ -17,6 +28,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {
