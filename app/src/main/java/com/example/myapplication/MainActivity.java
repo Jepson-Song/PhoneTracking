@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private SensorManager mSensorManager;
     private TextView tvAccelerometer, tvGravity, tvGyroscope, tvTime;
-    private Button btAllSensors, btSocket, btStart, btPlay, btTime, btStartTime;
+    private Button btAllSensors, btSocket, btStart, btPlay, btTime, btStartTime, btJni;
     private EditText etStartTime;
     private boolean startClickFlag = true;
     private String fileName = "null";
@@ -255,6 +255,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 startClickFlag = !startClickFlag;
 
+            }
+        });
+
+        btJni = (Button)findViewById(R.id.btJni);
+        btJni.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tvTime.setText(jni.JniPlug.getNativeSring());
             }
         });
 

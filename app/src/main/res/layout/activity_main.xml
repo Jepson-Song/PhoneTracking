@@ -104,6 +104,14 @@
         app:layout_constraintStart_toStartOf="@+id/btSocket"
         app:layout_constraintTop_toBottomOf="@+id/btSocket" />
 
+    <Button
+        android:id="@+id/btJni"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="JNI"
+        app:layout_constraintBottom_toTopOf="@+id/btStartTime"
+        app:layout_constraintStart_toStartOf="@+id/btStartTime" />
+
     <EditText
         android:id="@+id/etStartTime"
         android:layout_width="0dp"
