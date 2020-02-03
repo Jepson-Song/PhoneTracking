@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btJni.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                tvTime.setText(jni.JniPlug.getNativeSring());
+                tvTime.setText(jni.JniPlug.getNativeSring(1, 2));
             }
         });
 
