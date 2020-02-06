@@ -8,12 +8,23 @@
     tools:layout_editor_absoluteY="81dp">
 
 
+    <EditText
+        android:id="@+id/etFile"
+        android:layout_width="406dp"
+        android:layout_height="68dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginBottom="12dp"
+        android:text="filename"
+        app:layout_constraintBottom_toTopOf="@+id/btFile"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
         android:id="@+id/btn_send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="60dp"
-        android:layout_marginRight="60dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginRight="40dp"
         android:layout_marginBottom="28dp"
         android:text="send"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -23,17 +34,27 @@
         android:id="@+id/btTest"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginLeft="60dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginLeft="28dp"
         android:layout_marginBottom="28dp"
         android:text="TEST"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <Button
+        android:id="@+id/btFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        android:text="FILE"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_send"
+        app:layout_constraintStart_toEndOf="@+id/btTest" />
+
     <TextView
         android:id="@+id/receive"
-        android:layout_width="407dp"
-        android:layout_height="279dp"
+        android:layout_width="414dp"
+        android:layout_height="219dp"
         android:text="receive"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -42,18 +63,22 @@
 
     <EditText
         android:id="@+id/input"
-        android:layout_width="406dp"
+        android:layout_width="0dp"
         android:layout_height="68dp"
-        android:layout_marginBottom="104dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginEnd="2dp"
+        android:layout_marginRight="2dp"
         android:text="input"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/etFile"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/address"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:text="address"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -69,17 +70,47 @@ public class SocketAndroidActivity extends AppCompatActivity {
             public void onClick(View v) {
                 addStr = address.getText().toString().trim();
                 portStr = Integer.parseInt(port.getText().toString().trim());
+
+                new WorkThread().start();
+            }
+        });
+
+        Button btFile = (Button)findViewById(R.id.btFile);
+        btFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addStr = address.getText().toString().trim();
+                portStr = Integer.parseInt(port.getText().toString().trim());
+
+                    //FileTransferClient ftc = new FileTransferClient(addStr, 8899, "/test/test.txt");
+                    //ftc.setServerIp(addStr);
+                    //ftc.setServerPort(8899);
+                    //ftc.setFilename("/test/test.txt");
+                    //ftc.sendFile();
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
+                                FileTransferClient ftc = new FileTransferClient(addStr, 8899, mFileName+"/test/test.mp3");
+                                ftc.sendFile();
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
                 new WorkThread().start();
             }
         });
 
 
-        class DelayTask extends TimerTask {
+        /*class Task implements Runnable  {
             @Override
             public void run() {
-
+                FileTransferClient ftc = new FileTransferClient(addStr, 8899, "/test/test.txt");
             }
-        }
+        }*/
 
         Button btTest = (Button)findViewById(R.id.btTest);
         btTest.setOnClickListener(new View.OnClickListener() {
