@@ -43,8 +43,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private EditText etStartTime;
     private boolean startClickFlag = true;
     private String fileName = "null";
-    private MediaRecorder mSoundRecorder;
-    private MediaPlayer mSoundPlayer;
     private boolean playClickFlag = true;
 
     private Thread thread;
@@ -62,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     private MyAudioRecorder mAudioRecorder;
+    private MyAudioPlayer mAudioPlayer;
 
     public String newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -75,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         String str = data.getStringExtra("data");
         tvTime.setText(str);
     }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 tvTime.setText("avgDeltaTime: "+strAvgDeltaTime);
             }
         });
+
 
 
 
@@ -156,38 +158,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     playClickFlag = !playClickFlag;
                     btPlay.setBackgroundColor(Color.parseColor(color2));
 
-                    mSoundPlayer = new MediaPlayer();
-                    try {
-                        mSoundPlayer.setDataSource(fileName);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    mSoundPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mSoundPlayer.prepareAsync();
-                    mSoundPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                        @Override
-                        public void onPrepared(MediaPlayer mp) {
-                            mSoundPlayer.start();
-                        }
-                    });
-                    mSoundPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            btPlay.setText("PLAY");
-                            playClickFlag = !playClickFlag;
-                            btPlay.setBackgroundColor(Color.parseColor(color1));
-                            Log.d(TAG, "播放完毕");
-                        }
-                    });
+                    mAudioPlayer = new MyAudioPlayer(btPlay, fileName);
+                    mAudioPlayer.startPlay();
+
                 }
                 else{
                     btPlay.setText("PLAY");
                     playClickFlag = !playClickFlag;
                     btPlay.setBackgroundColor(Color.parseColor(color1));
 
-                    mSoundPlayer.stop();
-                    mSoundPlayer.release();
-                    mSoundPlayer = null;
+                    mAudioPlayer.stopPlay();
                 }
             }
         });
@@ -222,18 +202,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     btStart.setBackgroundColor(Color.parseColor(color2));
                     btStartTime.setBackgroundColor(Color.parseColor(color2));
 
-                    mSoundRecorder = new MediaRecorder();
-                    mSoundRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                    mSoundRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                     fileName = newFileName();
-                    mSoundRecorder.setOutputFile(fileName);
-                    mSoundRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                    try {
-                        mSoundRecorder.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    mSoundRecorder.start();
+                    mAudioRecorder = new MyAudioRecorder(fileName);
+                    mAudioRecorder.startRecord();
                 }
                 else{
                     btStart.setText("START");
@@ -241,9 +212,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     btStart.setBackgroundColor(Color.parseColor(color1));
                     btStartTime.setBackgroundColor(Color.parseColor(color1));
 
-                    mSoundRecorder.stop();
-                    mSoundRecorder.release();
-                    mSoundRecorder = null;
+                    mAudioRecorder.stopRecord();
                 }
                 startClickFlag = !startClickFlag;
 
