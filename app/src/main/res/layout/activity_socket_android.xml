@@ -9,18 +9,18 @@
 
 
     <EditText
-        android:id="@+id/etFile"
+        android:id="@+id/etFileAddress"
         android:layout_width="406dp"
         android:layout_height="68dp"
         android:layout_marginStart="4dp"
         android:layout_marginLeft="4dp"
         android:layout_marginBottom="12dp"
         android:text="filename"
-        app:layout_constraintBottom_toTopOf="@+id/btFile"
+        app:layout_constraintBottom_toTopOf="@+id/btSendFile"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btn_send"
+        android:id="@+id/btSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="40dp"
@@ -42,58 +42,58 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btFile"
+        android:id="@+id/btSendFile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="28dp"
         android:text="FILE"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btn_send"
+        app:layout_constraintEnd_toStartOf="@+id/btSend"
         app:layout_constraintStart_toEndOf="@+id/btTest" />
 
     <TextView
-        android:id="@+id/receive"
+        android:id="@+id/tvRecieve"
         android:layout_width="414dp"
         android:layout_height="219dp"
-        android:text="receive"
+        android:text="tvReceive"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/port" />
+        app:layout_constraintTop_toBottomOf="@+id/etPort" />
 
     <EditText
-        android:id="@+id/input"
+        android:id="@+id/etInput"
         android:layout_width="0dp"
         android:layout_height="68dp"
         android:layout_marginStart="2dp"
         android:layout_marginLeft="2dp"
         android:layout_marginEnd="2dp"
         android:layout_marginRight="2dp"
-        android:text="input"
-        app:layout_constraintBottom_toTopOf="@+id/etFile"
+        android:text="etInput"
+        app:layout_constraintBottom_toTopOf="@+id/etFileAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
-        android:id="@+id/address"
+        android:id="@+id/etIpAddress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="address"
+        android:text="etIpAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/port"
+        android:id="@+id/etPort"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="port"
+        android:text="etPort"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/address" />
+        app:layout_constraintTop_toBottomOf="@+id/etIpAddress" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

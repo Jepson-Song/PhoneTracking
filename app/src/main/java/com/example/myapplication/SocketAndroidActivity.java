@@ -38,8 +38,9 @@ public class SocketAndroidActivity extends AppCompatActivity {
     private static final int CLOSE = 2;
     private static final int RECEIVE = 3;
 
-    TextView text,tvTime;
-    EditText input, address, port;
+    private TextView tvRecieve;
+    private EditText etInput, etIpAddress, etPort, etFileAddress;
+    private Button btSend, btSendFile, btTest;
     Socket socket;
 
     String addStr, sendMsg, receiveMsg;
@@ -51,79 +52,77 @@ public class SocketAndroidActivity extends AppCompatActivity {
 
     private SharedPreferences sp;
 
+    private String WavFileName;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_socket_android);
-        tvTime = (TextView)findViewById(R.id.tvTime);
-        Button button = (Button) this.findViewById(R.id.btn_send);
-        text = (TextView) findViewById(R.id.receive);
-        input = (EditText) findViewById(R.id.input);
-        address = (EditText) findViewById(R.id.address);
-        port = (EditText) findViewById(R.id.port);
-        address.setText("192.168.43.95");
-        port.setText("8896");
-        button.setOnClickListener(new View.OnClickListener() {
+
+        btSend = (Button) this.findViewById(R.id.btSend);
+        tvRecieve = (TextView) findViewById(R.id.tvRecieve);
+        etInput = (EditText) findViewById(R.id.etInput);
+        etIpAddress = (EditText) findViewById(R.id.etIpAddress);
+        etPort = (EditText) findViewById(R.id.etPort);
+        etIpAddress.setText("192.168.43.95");
+        etPort.setText("8896");
+
+        etFileAddress = (EditText)findViewById(R.id.etFileAddress);
+        sp = getSharedPreferences("User", Context.MODE_PRIVATE);;
+        WavFileName = sp.getString("WavFileName", "null");
+        etFileAddress.setText(WavFileName);
+
+        btSend.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                addStr = address.getText().toString().trim();
-                portStr = Integer.parseInt(port.getText().toString().trim());
+                addStr = etIpAddress.getText().toString().trim();
+                portStr = Integer.parseInt(etPort.getText().toString().trim());
 
                 new WorkThread().start();
             }
         });
 
-        Button btFile = (Button)findViewById(R.id.btFile);
-        btFile.setOnClickListener(new View.OnClickListener() {
+        btSendFile = (Button)findViewById(R.id.btSendFile);
+        btSendFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addStr = address.getText().toString().trim();
-                portStr = Integer.parseInt(port.getText().toString().trim());
+                addStr = etIpAddress.getText().toString().trim();
+                portStr = Integer.parseInt(etPort.getText().toString().trim());
 
-                    //FileTransferClient ftc = new FileTransferClient(addStr, 8899, "/test/test.txt");
-                    //ftc.setServerIp(addStr);
-                    //ftc.setServerPort(8899);
-                    //ftc.setFilename("/test/test.txt");
-                    //ftc.sendFile();
+                //String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-                                FileTransferClient ftc = new FileTransferClient(addStr, 8899, mFileName+"/test/test.mp3");
-                                ftc.sendFile();
-                            } catch (Exception e){
-                                e.printStackTrace();
-                            }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            FileTransferClient ftc = new FileTransferClient(addStr, 8899, WavFileName);
+                            ftc.sendFile();
+                        } catch (Exception e){
+                            e.printStackTrace();
                         }
-                    }).start();
+                        //text.append("\nsend file "+WavFileName+" successfully!");
+                    }
+                }).start();
+                tvRecieve.append("\nsend file "+WavFileName+" successfully!");
                 new WorkThread().start();
             }
         });
 
 
-        /*class Task implements Runnable  {
-            @Override
-            public void run() {
-                FileTransferClient ftc = new FileTransferClient(addStr, 8899, "/test/test.txt");
-            }
-        }*/
-
-        Button btTest = (Button)findViewById(R.id.btTest);
+        btTest = (Button)findViewById(R.id.btTest);
         btTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addStr = address.getText().toString().trim();
-                portStr = Integer.parseInt(port.getText().toString().trim());
+                addStr = etIpAddress.getText().toString().trim();
+                portStr = Integer.parseInt(etPort.getText().toString().trim());
 
                 int n = 10;
                 for (int i=1; i<=n ; i++){
 
                     long time = getTodayMS();
-                    input.setText("TIME:" + time);
+                    etInput.setText("TIME:" + time);
 
                     new WorkThread().start();
 
@@ -144,7 +143,7 @@ public class SocketAndroidActivity extends AppCompatActivity {
                 /**
                  * 获取SharedPreferenced对象
                  * 第一个参数是生成xml的文件名
-                 * 第二个参数是存储的格式（**注意**本文后面会讲解）
+                 * 第二个参数是存储的格式
                  */
                 sp = getSharedPreferences("User", Context.MODE_PRIVATE);
                 //获取到edit对象
@@ -183,13 +182,13 @@ public class SocketAndroidActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == CONNECTING) {
-                text.setText("正在连接中......");
+                tvRecieve.append("\n正在连接中......");
             } else if (msg.what == SENDING) {
-                text.setText("Client Sending: '" + sendMsg + "'");
+                tvRecieve.append("\n正在发送信息: '" + sendMsg + "'");
             } else if (msg.what == CLOSE) {
-                text.append("\nsocket close");
+                tvRecieve.append("\n关闭");
             } else if (msg.what == RECEIVE) {
-                text.setText("Client Receiveing: '" + receiveMsg + "'");
+                tvRecieve.append("\n正在接受信息: '" + receiveMsg + "'");
             }
 
 
@@ -223,7 +222,7 @@ public class SocketAndroidActivity extends AppCompatActivity {
                     return;
                 }
                 //发送给服务端的消息
-                sendMsg = input.getText().toString();
+                sendMsg = etInput.getText().toString();
                 msg1.what = SENDING;
                 handler.sendMessage(msg1);
                 //socket.getOutputStream  out是个字符输出流，后面true说明执行后自动刷新

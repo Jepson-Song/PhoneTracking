@@ -138,6 +138,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     btStartTime.setBackgroundColor(Color.parseColor(color1));
 
                     mAudioRecorder.stopRecord();
+
+                    /**
+                     * 获取SharedPreferenced对象
+                     * 第一个参数是生成xml的文件名
+                     * 第二个参数是存储的格式
+                     */
+                    sp = getSharedPreferences("User", Context.MODE_PRIVATE);
+                    //获取到edit对象
+                    SharedPreferences.Editor editor = sp.edit();
+                    //通过editor对象写入数据
+                    editor.putString("WavFileName", fileName);
+                    //提交数据存入到xml文件中
+                    editor.commit();
                 }
                 startClickFlag = !startClickFlag;
             }
