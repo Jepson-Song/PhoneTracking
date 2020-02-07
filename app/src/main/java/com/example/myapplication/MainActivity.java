@@ -60,11 +60,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private double avgDeltaTime;
     private int startM;
 
+
+    private MyAudioRecorder mAudioRecorder;
+
     public String newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
 
         String s = new SimpleDateFormat("yyyy-MM-dd_hhmmss").format(new Date());
-        return mFileName += "/test/rcd_" + s + ".3gp";
+        return mFileName += "/test/rcd_" + s + ".wav";
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -122,18 +125,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     btStart.setBackgroundColor(Color.parseColor(color2));
                     btStartTime.setBackgroundColor(Color.parseColor(color2));
 
-                    mSoundRecorder = new MediaRecorder();
-                    mSoundRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                    mSoundRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                     fileName = newFileName();
-                    mSoundRecorder.setOutputFile(fileName);
-                    mSoundRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                    try {
-                        mSoundRecorder.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    mSoundRecorder.start();
+                    mAudioRecorder = new MyAudioRecorder(fileName);
+                    mAudioRecorder.startRecord();
                 }
                 else{
                     btStart.setText("START");
@@ -141,9 +135,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     btStart.setBackgroundColor(Color.parseColor(color1));
                     btStartTime.setBackgroundColor(Color.parseColor(color1));
 
-                    mSoundRecorder.stop();
-                    mSoundRecorder.release();
-                    mSoundRecorder = null;
+                    mAudioRecorder.stopRecord();
                 }
                 startClickFlag = !startClickFlag;
             }
