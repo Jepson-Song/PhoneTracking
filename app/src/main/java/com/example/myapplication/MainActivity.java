@@ -1,6 +1,5 @@
 package com.example.myapplication;
 
-import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -12,9 +11,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -32,8 +28,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import android.content.BroadcastReceiver;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -43,17 +37,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView tvAccelerometer, tvGravity, tvGyroscope, tvTime;
     private Button btAllSensors, btSocket, btStart, btPlay, btTime, btStartTime, btJni;
     private EditText etStartTime;
-    private boolean startClickFlag = true;
     private String fileName = "null";
-    private boolean playClickFlag = true;
+    private boolean isRecording = false;
+    private boolean isWaiting = false;
+    private boolean isPlaying = false;
 
-    private Thread thread;
-    private Boolean RUN = true;
-    private Calendar calendar;
-    private long s, ms;
-
-    final String color1 = "#9BA8A8";
-    final String color2 = "#00cccc";
+    private static final String color1 = "#9BA8A8";
+    private static final String color2 = "#00CCCC";
+    private static final String color3 = "#4EBABA";
     private IntentFilter intentFilter;
 
     private SharedPreferences sp;
@@ -65,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private static final int STOPRECORD = 0;
     private static final int STARTRECORD = 1;
+    private static final int WAITRECORD = 2;
 
     public String newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -88,6 +80,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         fileName = newFileName();
         mAudioRecorder = new MyAudioRecorder(fileName);
         mAudioRecorder.startRecord();
+    }
+
+    private void waitRecord(){
+        btStart.setText("WAIT");
+        btStartTime.setText("WAIT");
+        btStart.setBackgroundColor(Color.parseColor(color3));
+        btStartTime.setBackgroundColor(Color.parseColor(color3));
     }
 
     private void stopRecord(){
@@ -115,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void startPlay(){
         Toast.makeText(MainActivity.this, fileName, Toast.LENGTH_SHORT).show();
         btPlay.setText("STOP");
-        playClickFlag = !playClickFlag;
+        isPlaying = !isPlaying;
         btPlay.setBackgroundColor(Color.parseColor(color2));
 
         mAudioPlayer = new MyAudioPlayer(btPlay, fileName);
@@ -124,10 +123,39 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void stopPlay(){
         btPlay.setText("PLAY");
-        playClickFlag = !playClickFlag;
+        isPlaying = !isPlaying;
         btPlay.setBackgroundColor(Color.parseColor(color1));
 
         mAudioPlayer.stopPlay();
+    }
+
+    private class WaitThread extends Thread{
+        @Override
+        public void run(){
+            isWaiting = true;
+            startM = Integer.parseInt(etStartTime.getText().toString().trim());
+            if(avgDeltaTime < 0) {
+                startM -= 1;
+                if(startM < 0) startM = 59;
+                avgDeltaTime += 60*1000;
+            }
+
+            Calendar calendar;
+            int m, s, ms;
+            while (true) {
+                calendar = Calendar.getInstance();
+                m = calendar.get(Calendar.MINUTE);
+                s = calendar.get(Calendar.SECOND);
+                ms = calendar.get(Calendar.MILLISECOND);
+                if (m >= startM && s * 1000 + ms >= avgDeltaTime) break;
+            }
+
+            Message msg = new Message();
+            msg.what = STARTRECORD;
+            handler.sendMessage(msg);
+
+            isWaiting = false;
+        }
     }
 
 
@@ -135,7 +163,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         @Override
         public void handleMessage(Message msg){
             if(msg.what == STARTRECORD){
-                startRecord();
+                if (isRecording){
+                    Toast.makeText(MainActivity.this, "is recording now!", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    startRecord();
+                    isRecording = !isRecording;
+                }
             }
             else if(msg.what == STOPRECORD){
                 stopRecord();
@@ -180,37 +214,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-
         btStart =(Button) findViewById(R.id.btStart);
         btStart.setBackgroundColor(Color.parseColor(color1));
         btStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(startClickFlag){
+                if (isWaiting){
+                    Toast.makeText(MainActivity.this, "is waiting !", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(!isRecording){
                     startRecord();
                 }
                 else{
                     stopRecord();
                 }
-                startClickFlag = !startClickFlag;
-            }
-        });
-
-
-        btPlay =(Button)findViewById(R.id.btPlay);
-        btPlay.setBackgroundColor(Color.parseColor(color1));
-        btPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(fileName == "null"){
-                    Toast.makeText(MainActivity.this, "NO SOUND RECORDER!", Toast.LENGTH_SHORT).show();
-                }
-                else if(playClickFlag){
-                    startPlay();
-                }
-                else{
-                    stopPlay();
-                }
+                isRecording = !isRecording;
             }
         });
 
@@ -220,34 +239,40 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btStartTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startM = Integer.parseInt(etStartTime.getText().toString().trim());
-
-                if(avgDeltaTime < 0) {
-                    startM -= 1;
-                    if(startM < 0) startM = 59;
-                    avgDeltaTime += 60*1000;
+                if (isWaiting){
+                    Toast.makeText(MainActivity.this, "is waiting !", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-
-                Calendar calendar;
-                int m, s, ms;
-                while (true) {
-                    calendar = Calendar.getInstance();
-                    m = calendar.get(Calendar.MINUTE);
-                    s = calendar.get(Calendar.SECOND);
-                    ms = calendar.get(Calendar.MILLISECOND);
-                    if (m >= startM && s * 1000 + ms >= avgDeltaTime) break;
-                }
-
-                if(startClickFlag){
-                    startRecord();
+                if(!isRecording){
+                    waitRecord();
+                    new WaitThread().start();
+                    //startRecord();
                 }
                 else{
                     stopRecord();
+                    isRecording = !isRecording;
                 }
-                startClickFlag = !startClickFlag;
 
             }
         });
+
+        btPlay =(Button)findViewById(R.id.btPlay);
+        btPlay.setBackgroundColor(Color.parseColor(color1));
+        btPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(fileName == "null"){
+                    Toast.makeText(MainActivity.this, "NO SOUND RECORDER!", Toast.LENGTH_SHORT).show();
+                }
+                else if(!isPlaying){
+                    startPlay();
+                }
+                else{
+                    stopPlay();
+                }
+            }
+        });
+
 
         /**
          * 调用C程序
@@ -259,7 +284,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 tvTime.setText(jni.JniPlug.getNativeSring(1, 2));
             }
         });
-
 
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE); //获取系统传感器服务权限
 
@@ -337,7 +361,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        thread = null;
         //unregisterReceiver(receiver);
     }
 

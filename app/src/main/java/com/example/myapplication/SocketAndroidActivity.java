@@ -160,12 +160,6 @@ public class SocketAndroidActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        /*//设置返回的数据
-        Intent intent = new Intent();
-        intent.putExtra("data", deltaTime+"");
-        setResult(11, intent);
-        //关闭当前activity
-        finish();*/
     }
 
     private long getTodayMS(){
