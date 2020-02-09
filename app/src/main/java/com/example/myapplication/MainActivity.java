@@ -112,6 +112,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         editor.commit();
     }
 
+    private void startPlay(){
+        Toast.makeText(MainActivity.this, fileName, Toast.LENGTH_SHORT).show();
+        btPlay.setText("STOP");
+        playClickFlag = !playClickFlag;
+        btPlay.setBackgroundColor(Color.parseColor(color2));
+
+        mAudioPlayer = new MyAudioPlayer(btPlay, fileName);
+        mAudioPlayer.startPlay();
+    }
+
+    private void stopPlay(){
+        btPlay.setText("PLAY");
+        playClickFlag = !playClickFlag;
+        btPlay.setBackgroundColor(Color.parseColor(color1));
+
+        mAudioPlayer.stopPlay();
+    }
+
+
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg){
@@ -187,21 +206,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     Toast.makeText(MainActivity.this, "NO SOUND RECORDER!", Toast.LENGTH_SHORT).show();
                 }
                 else if(playClickFlag){
-                    Toast.makeText(MainActivity.this, fileName, Toast.LENGTH_SHORT).show();
-                    btPlay.setText("STOP");
-                    playClickFlag = !playClickFlag;
-                    btPlay.setBackgroundColor(Color.parseColor(color2));
-
-                    mAudioPlayer = new MyAudioPlayer(btPlay, fileName);
-                    mAudioPlayer.startPlay();
-
+                    startPlay();
                 }
                 else{
-                    btPlay.setText("PLAY");
-                    playClickFlag = !playClickFlag;
-                    btPlay.setBackgroundColor(Color.parseColor(color1));
-
-                    mAudioPlayer.stopPlay();
+                    stopPlay();
                 }
             }
         });
