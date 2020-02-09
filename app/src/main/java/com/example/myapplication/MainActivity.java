@@ -17,6 +17,8 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -58,14 +60,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private double avgDeltaTime;
     private int startM;
 
-
     private MyAudioRecorder mAudioRecorder;
     private MyAudioPlayer mAudioPlayer;
+
+    private static final int STOPRECORD = 0;
+    private static final int STARTRECORD = 1;
 
     public String newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
 
-        String s = new SimpleDateFormat("yyyy-MM-dd_hhmmss").format(new Date());
+        String s = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
         return mFileName += "/test/rcd_" + s + ".wav";
     }
 
@@ -75,6 +79,50 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         tvTime.setText(str);
     }
 
+    private void startRecord(){
+        btStart.setText("STOP");
+        btStartTime.setText("STOP");
+        btStart.setBackgroundColor(Color.parseColor(color2));
+        btStartTime.setBackgroundColor(Color.parseColor(color2));
+
+        fileName = newFileName();
+        mAudioRecorder = new MyAudioRecorder(fileName);
+        mAudioRecorder.startRecord();
+    }
+
+    private void stopRecord(){
+        btStart.setText("START");
+        btStartTime.setText("START2");
+        btStart.setBackgroundColor(Color.parseColor(color1));
+        btStartTime.setBackgroundColor(Color.parseColor(color1));
+
+        mAudioRecorder.stopRecord();
+
+        /**
+         * 获取SharedPreferenced对象
+         * 第一个参数是生成xml的文件名
+         * 第二个参数是存储的格式
+         */
+        sp = getSharedPreferences("User", Context.MODE_PRIVATE);
+        //获取到edit对象
+        SharedPreferences.Editor editor = sp.edit();
+        //通过editor对象写入数据
+        editor.putString("WavFileName", fileName);
+        //提交数据存入到xml文件中
+        editor.commit();
+    }
+
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            if(msg.what == STARTRECORD){
+                startRecord();
+            }
+            else if(msg.what == STOPRECORD){
+                stopRecord();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,43 +162,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
 
 
-
-
         btStart =(Button) findViewById(R.id.btStart);
         btStart.setBackgroundColor(Color.parseColor(color1));
         btStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(startClickFlag){
-                    btStart.setText("STOP");
-                    btStartTime.setText("STOP");
-                    btStart.setBackgroundColor(Color.parseColor(color2));
-                    btStartTime.setBackgroundColor(Color.parseColor(color2));
-
-                    fileName = newFileName();
-                    mAudioRecorder = new MyAudioRecorder(fileName);
-                    mAudioRecorder.startRecord();
+                    startRecord();
                 }
                 else{
-                    btStart.setText("START");
-                    btStartTime.setText("START2");
-                    btStart.setBackgroundColor(Color.parseColor(color1));
-                    btStartTime.setBackgroundColor(Color.parseColor(color1));
-
-                    mAudioRecorder.stopRecord();
-
-                    /**
-                     * 获取SharedPreferenced对象
-                     * 第一个参数是生成xml的文件名
-                     * 第二个参数是存储的格式
-                     */
-                    sp = getSharedPreferences("User", Context.MODE_PRIVATE);
-                    //获取到edit对象
-                    SharedPreferences.Editor editor = sp.edit();
-                    //通过editor对象写入数据
-                    editor.putString("WavFileName", fileName);
-                    //提交数据存入到xml文件中
-                    editor.commit();
+                    stopRecord();
                 }
                 startClickFlag = !startClickFlag;
             }
@@ -210,28 +231,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
 
                 if(startClickFlag){
-                    btStart.setText("STOP");
-                    btStartTime.setText("STOP");
-                    btStart.setBackgroundColor(Color.parseColor(color2));
-                    btStartTime.setBackgroundColor(Color.parseColor(color2));
-
-                    fileName = newFileName();
-                    mAudioRecorder = new MyAudioRecorder(fileName);
-                    mAudioRecorder.startRecord();
+                    startRecord();
                 }
                 else{
-                    btStart.setText("START");
-                    btStartTime.setText("START2");
-                    btStart.setBackgroundColor(Color.parseColor(color1));
-                    btStartTime.setBackgroundColor(Color.parseColor(color1));
-
-                    mAudioRecorder.stopRecord();
+                    stopRecord();
                 }
                 startClickFlag = !startClickFlag;
 
             }
         });
 
+        /**
+         * 调用C程序
+         */
         btJni = (Button)findViewById(R.id.btJni);
         btJni.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -247,34 +259,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         tvGravity = (TextView)findViewById(R.id.tvGravity);
         tvGyroscope = (TextView)findViewById(R.id.tvGyroscope);
 
-
         tvTime = (TextView)findViewById(R.id.tvTime);
 
-        /*
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_TIME_TICK);//每分钟变化
-        intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);//设置了系统时区
-        intentFilter.addAction(Intent.ACTION_TIME_CHANGED);//设置了系统时间
-        registerReceiver(receiver, intentFilter);
-         */
-
     }
-/*
-    //每分钟改变一次
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_TIME_TICK)) {
-                //do what you want to do ...13
-                calendar = Calendar.getInstance();
-                s = calendar.get(Calendar.SECOND);
-                ms = calendar.get(Calendar.MILLISECOND);
-                tvTime.setText(s+"."+ms+"\n");
-            }
-        }
-    };
-*/
+
     @Override
     public void onSensorChanged(SensorEvent event){
         switch (event.sensor.getType()){
