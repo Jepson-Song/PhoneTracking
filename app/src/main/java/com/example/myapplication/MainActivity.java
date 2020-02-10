@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +29,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.FutureTask;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -242,6 +244,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (isWaiting){
                     Toast.makeText(MainActivity.this, "is waiting !", Toast.LENGTH_SHORT).show();
                     return;
+                }
+                Calendar calendar = Calendar.getInstance();
+                int m = calendar.get(Calendar.MINUTE)+1;
+                if (m == 60){
+                    m = 0;
+                }
+                if (true){//TextUtils.isEmpty(etStartTime.getText().toString().trim())){
+                    etStartTime.setText(m+"");
+                    Log.e(TAG, "onClick: "+m );
                 }
                 if(!isRecording){
                     waitRecord();

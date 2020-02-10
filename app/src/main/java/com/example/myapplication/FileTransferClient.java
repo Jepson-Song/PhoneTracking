@@ -2,11 +2,14 @@ package com.example.myapplication;
 
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.security.PublicKey;
+import java.util.logging.Handler;
 
 /**
  * 文件传输Client端<br>
@@ -81,7 +84,7 @@ public class FileTransferClient extends Socket {
                 int length = 0;
                 long progress = 0;
                 while((length = fis.read(bytes, 0, bytes.length)) != -1) {
-                    Log.e("myerror",  new String(bytes));
+                    //Log.e("myerror",  new String(bytes));
                     dos.write(bytes, 0, length);
                     dos.flush();
                     progress += length;
@@ -89,6 +92,12 @@ public class FileTransferClient extends Socket {
                 }
                 Log.e("myerror", "" );
                 Log.e("myerror",  "======== 文件传输成功 ========");
+
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(client.getInputStream()));
+                // 得到服务器信息
+                String receiveMsg = in.readLine();
+                Log.e("myerror",  "receiveMsg: "+receiveMsg);
             }
             else{
                 Log.e("myerror",  "file does not exist!");
@@ -103,6 +112,10 @@ public class FileTransferClient extends Socket {
             client.close();
         }
     }
+/*
+    public void display(Handler handler){
+        handler.sendMessage(msg);
+    }*/
  
     /**
      * 入口

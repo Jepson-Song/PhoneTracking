@@ -37,6 +37,10 @@ public class SocketAndroidActivity extends AppCompatActivity {
     private static final int SENDING = 1;
     private static final int CLOSE = 2;
     private static final int RECEIVE = 3;
+    private static final int DELTATIME = 4;
+    private static final int AVGDELTATIME = 5;
+    private static final int FILESENDING = 6;
+    private static final int FILESENDDONE = 7;
 
     private TextView tvRecieve;
     private EditText etInput, etIpAddress, etPort, etFileAddress;
@@ -53,6 +57,9 @@ public class SocketAndroidActivity extends AppCompatActivity {
     private SharedPreferences sp;
 
     private String WavFileName;
+
+    private boolean isTest = false;
+
 
 
     @Override
@@ -84,6 +91,16 @@ public class SocketAndroidActivity extends AppCompatActivity {
             }
         });
 
+        btTest = (Button)findViewById(R.id.btTest);
+        btTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addStr = etIpAddress.getText().toString().trim();
+                portStr = Integer.parseInt(etPort.getText().toString().trim());
+                new TestThread().start();
+            }
+        });
+
         btSendFile = (Button)findViewById(R.id.btSendFile);
         btSendFile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,70 +108,12 @@ public class SocketAndroidActivity extends AppCompatActivity {
                 addStr = etIpAddress.getText().toString().trim();
                 portStr = Integer.parseInt(etPort.getText().toString().trim());
 
-                //String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            FileTransferClient ftc = new FileTransferClient(addStr, 8899, WavFileName);
-                            ftc.sendFile();
-                        } catch (Exception e){
-                            e.printStackTrace();
-                        }
-                        //text.append("\nsend file "+WavFileName+" successfully!");
-                    }
-                }).start();
-                tvRecieve.append("\nsend file "+WavFileName+" successfully!");
-                new WorkThread().start();
+                new SendFileThread().start();
+                //new WorkThread().start();
             }
         });
 
 
-        btTest = (Button)findViewById(R.id.btTest);
-        btTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addStr = etIpAddress.getText().toString().trim();
-                portStr = Integer.parseInt(etPort.getText().toString().trim());
-
-                int n = 10;
-                for (int i=1; i<=n ; i++){
-
-                    long time = getTodayMS();
-                    etInput.setText("TIME:" + time);
-
-                    new WorkThread().start();
-
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    //Toast.makeText(SocketAndroidActivity.this, "time:"+time, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(SocketAndroidActivity.this, "time:"+time+"  deltaTime:"+deltaTime, Toast.LENGTH_SHORT).show();
-                    avgDeltaTime += deltaTime;
-;
-                }
-                avgDeltaTime/=n;
-                Toast.makeText(SocketAndroidActivity.this, "avgDeltaTime:"+avgDeltaTime, Toast.LENGTH_SHORT).show();
-
-                /**
-                 * 获取SharedPreferenced对象
-                 * 第一个参数是生成xml的文件名
-                 * 第二个参数是存储的格式
-                 */
-                sp = getSharedPreferences("User", Context.MODE_PRIVATE);
-                //获取到edit对象
-                SharedPreferences.Editor editor = sp.edit();
-                //通过editor对象写入数据
-                editor.putString("avgDeltaTime", avgDeltaTime+"");
-                //提交数据存入到xml文件中
-                editor.commit();
-
-            }
-        });
     }
 
     @Override
@@ -183,11 +142,78 @@ public class SocketAndroidActivity extends AppCompatActivity {
                 tvRecieve.append("\n关闭");
             } else if (msg.what == RECEIVE) {
                 tvRecieve.append("\n正在接受信息: '" + receiveMsg + "'");
+            } else if (msg.what == DELTATIME){
+                Toast.makeText(SocketAndroidActivity.this,"deltaTime:"+deltaTime, Toast.LENGTH_SHORT).show();
+            } else if (msg.what == AVGDELTATIME) {
+                Toast.makeText(SocketAndroidActivity.this, "avgDeltaTime:"+avgDeltaTime, Toast.LENGTH_SHORT).show();
+            } else if (msg.what == FILESENDING) {
+                tvRecieve.append("\nFile "+WavFileName+" sending...");
+            } else if (msg.what == FILESENDDONE) {
+                tvRecieve.append("\nsend file "+WavFileName+" successfully!");
             }
 
 
         }
     };
+
+    //SendFile线程
+    private class SendFileThread extends Thread{
+        @Override
+        public void run(){
+            try {
+                //tvRecieve.append("\nFile "+WavFileName+" sending...");
+                Message msg = new Message();
+                msg.what = FILESENDING;
+                handler.sendMessage(msg);
+
+                FileTransferClient ftc = new FileTransferClient(addStr, 8899, WavFileName);
+                ftc.sendFile();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            //tvRecieve.append("\nsend file "+WavFileName+" successfully!");
+        }
+    }
+
+    //Test线程
+    private class TestThread extends Thread{
+        @Override
+        public void run(){
+            isTest = true;
+            int n = 10;
+            for (int i=1; i<=n ; i++){
+                new WorkThread().start();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                avgDeltaTime += deltaTime;
+
+                Message msg = new Message();
+                msg.what = DELTATIME;
+                handler.sendMessage(msg);
+            }
+            avgDeltaTime/=n;
+            //Toast.makeText(SocketAndroidActivity.this, "avgDeltaTime:"+avgDeltaTime, Toast.LENGTH_SHORT).show();
+            Message msg = new Message();
+            msg.what = AVGDELTATIME;
+            handler.sendMessage(msg);
+            isTest = false;
+            /**
+             * 获取SharedPreferenced对象
+             * 第一个参数是生成xml的文件名
+             * 第二个参数是存储的格式
+             */
+            sp = getSharedPreferences("User", Context.MODE_PRIVATE);
+            //获取到edit对象
+            SharedPreferences.Editor editor = sp.edit();
+            //通过editor对象写入数据
+            editor.putString("avgDeltaTime", avgDeltaTime+"");
+            //提交数据存入到xml文件中
+            editor.commit();
+        }
+    }
 
 
     //private Boolean flag = true;
@@ -216,7 +242,12 @@ public class SocketAndroidActivity extends AppCompatActivity {
                     return;
                 }
                 //发送给服务端的消息
-                sendMsg = etInput.getText().toString();
+                if(isTest){
+                    sendMsg = "TIME:" + getTodayMS();
+                }
+                else {
+                    sendMsg = etInput.getText().toString();
+                }
                 msg1.what = SENDING;
                 handler.sendMessage(msg1);
                 //socket.getOutputStream  out是个字符输出流，后面true说明执行后自动刷新
@@ -224,6 +255,7 @@ public class SocketAndroidActivity extends AppCompatActivity {
                         new BufferedWriter(new OutputStreamWriter(
                                 socket.getOutputStream())), true);
                 out.println(sendMsg);
+                Log.e("myerror",  "sendMsg: "+sendMsg);
 
 
                 // 接收服务器信息
@@ -231,6 +263,7 @@ public class SocketAndroidActivity extends AppCompatActivity {
                         new InputStreamReader(socket.getInputStream()));
                 // 得到服务器信息
                 receiveMsg = in.readLine();
+                Log.e("myerror",  "receiveMsg: "+receiveMsg);
                 if(receiveMsg.substring(0,"deltaTime: ".length()).equals("deltaTime: ")){
                     deltaTime = Integer.parseInt(receiveMsg.substring("deltaTime: ".length(),receiveMsg.length()-2));
                     //Toast.makeText(SocketAndroidActivity.this, "deltaTime: "+ deltaTime+"ms", Toast.LENGTH_SHORT).show();
