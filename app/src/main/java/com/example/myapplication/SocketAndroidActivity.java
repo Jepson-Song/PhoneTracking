@@ -3,10 +3,8 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -15,7 +13,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -26,9 +23,10 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Calendar;
-import java.util.Timer;
-import java.util.TimerTask;
 
+/**
+ * Created by Jepson on 2020/1/10.
+ */
 public class SocketAndroidActivity extends AppCompatActivity {
 
     private static final String TAG = "SocketAndroidActivity";
@@ -292,7 +290,6 @@ public class SocketAndroidActivity extends AppCompatActivity {
                 msg2.what = CLOSE;
                 handler.sendMessage(msg2);
             }
-
 
         }
     }

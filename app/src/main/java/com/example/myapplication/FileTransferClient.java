@@ -12,7 +12,7 @@ import java.security.PublicKey;
 import java.util.logging.Handler;
 
 /**
- * 文件传输Client端<br>
+ * Created by Jepson on 2020/1/15.
  */
 public class FileTransferClient extends Socket {
     private static final String TAG = "FileTransferClient";
@@ -26,27 +26,10 @@ public class FileTransferClient extends Socket {
     private FileInputStream fis;
  
     private DataOutputStream dos;
-
-
-    /*public void setServerIp(String IP){
-        this.SERVER_IP = IP;
-        Log.e("myerror", "IP: "+IP);
-    }
-
-    public void setServerPort(int port){
-        this.SERVER_PORT = port;
-        Log.e("myerror", "port: "+port);
-    }*/
-
-    public void setFilename(String filename){
-        this.filename = filename;
-        Log.e("myerror", "filename: "+filename);
-    }
  
     /**
-     * 构造函数<br/>
+     * 构造函数
      * 与服务器建立连接
-     * @throws Exception
      */
     public FileTransferClient(String SERVER_IP, int SERVER_PORT, String filename) throws Exception {
         super(SERVER_IP, SERVER_PORT);
@@ -60,10 +43,24 @@ public class FileTransferClient extends Socket {
 
         Log.e("myerror",  "Cliect[port:" + client.getLocalPort() + "] 成功连接服务端");
     }
+
+    public void setServerIp(String IP){
+        this.SERVER_IP = IP;
+        Log.e("myerror", "IP: "+IP);
+    }
+
+    public void setServerPort(int port){
+        this.SERVER_PORT = port;
+        Log.e("myerror", "port: "+port);
+    }
+
+    public void setFilename(String filename){
+        this.filename = filename;
+        Log.e("myerror", "filename: "+filename);
+    }
  
     /**
      * 向服务端传输文件
-     * @throws Exception
      */
     public void sendFile() throws Exception {
         try {
@@ -88,9 +85,8 @@ public class FileTransferClient extends Socket {
                     dos.write(bytes, 0, length);
                     dos.flush();
                     progress += length;
-                    Log.e("myerror", "| " + (100*progress/file.length()) + "% |");
+                    Log.e("myerror", String.format("传输进度： | %.3f%% |", 100.0*progress/file.length()) );
                 }
-                Log.e("myerror", "" );
                 Log.e("myerror",  "======== 文件传输成功 ========");
 
                 BufferedReader in = new BufferedReader(
@@ -112,22 +108,4 @@ public class FileTransferClient extends Socket {
             client.close();
         }
     }
-/*
-    public void display(Handler handler){
-        handler.sendMessage(msg);
-    }*/
- 
-    /**
-     * 入口
-     * @param args
-     */
-    /*public static void main(String[] args) {
-        try {
-            FileTransferClient client = new FileTransferClient(); // 启动客户端连接
-            client.sendFile(); // 传输文件
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    */
 }

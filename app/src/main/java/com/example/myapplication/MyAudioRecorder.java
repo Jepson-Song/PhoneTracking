@@ -5,19 +5,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import android.app.Activity;
-import android.graphics.PixelFormat;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 
+/**
+ * Created by Jepson on 2019/12/25.
+ */
 public class MyAudioRecorder  {
     // 音频获取源
     private int audioSource = MediaRecorder.AudioSource.MIC;

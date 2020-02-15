@@ -1,7 +1,6 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -15,22 +14,21 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.FutureTask;
 
+/**
+ * Created by Jepson on 2019/12/25.
+ */
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final String TAG = "MainActivity";
@@ -83,14 +81,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mAudioRecorder = new MyAudioRecorder(fileName);
         mAudioRecorder.startRecord();
     }
-
-    private void waitRecord(){
-        btStart.setText("WAIT");
-        btStartTime.setText("WAIT");
-        btStart.setBackgroundColor(Color.parseColor(color3));
-        btStartTime.setBackgroundColor(Color.parseColor(color3));
-    }
-
     private void stopRecord(){
         btStart.setText("START");
         btStartTime.setText("START2");
@@ -112,6 +102,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //提交数据存入到xml文件中
         editor.commit();
     }
+
+    private void waitRecord(){
+        btStart.setText("WAIT");
+        btStartTime.setText("WAIT");
+        btStart.setBackgroundColor(Color.parseColor(color3));
+        btStartTime.setBackgroundColor(Color.parseColor(color3));
+    }
+
 
     private void startPlay(){
         Toast.makeText(MainActivity.this, fileName, Toast.LENGTH_SHORT).show();

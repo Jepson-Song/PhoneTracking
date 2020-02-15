@@ -10,18 +10,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
  
-/**
- * 文件传输Server端<br>
- * 功能说明：
- *
- * @author 大智若愚的小懂
- * @Date 2016年09月01日
- * @version 1.0
- */
-
  /*
 javac -encoding UTF-8 FileTransferServer.java
 java FileTransferServer
+ */
+
+ /**
+ * Created by Jepson on 2020/1/10.
  */
 public class FileTransferServer extends ServerSocket {
  
@@ -29,7 +24,7 @@ public class FileTransferServer extends ServerSocket {
  
     private static DecimalFormat df = null;
 
-    private String address = "E:\\Polyspace\\code";
+    private String address = "E:\\Polyspace\\code"; // 存储位置
  
     static {
         // 设置数字格式，保留一位有效小数
@@ -97,30 +92,40 @@ public class FileTransferServer extends ServerSocket {
                 int length = 0;
                 long progress = 0;
                 long startTime=System.currentTimeMillis();   //获取开始时间
-
+                boolean OK = false;
                 while((length = dis.read(bytes, 0, bytes.length)) != -1) {
                     //System.out.println(new String(bytes));
                     fos.write(bytes, 0, length);
                     fos.flush();
                     progress += length;
-                    System.out.printf("| %.3f%% |\n",100.0*progress/fileLength);
+                    System.out.printf("传输进度：| %.3f%% |\n",100.0*progress/fileLength);
                     if(progress >= fileLength){
+                        OK = true;
                         break;
                     }
                 }
                                 
                 long endTime=System.currentTimeMillis(); //获取结束时间
-                
-                System.out.println("======== 文件接收成功 [File Name：" + fileName + "] [Size：" + getFormatFileSize(fileLength) + "] ========");
-                System.out.println("======== 文件接收成功 [File Address：" + address + "]  ========");
-                System.out.println("======== 文件接收成功 [Cost Time: " + (endTime-startTime)+"ms" + "]  ========");
-
-                // 发送给客户端的消息 
-				PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
-				out.println("Send file "+fileName+" successfully!");
-				out.flush();
-                System.out.println("======== 反馈成功 ========");
-
+                System.out.println("======== [花费时间: " + (endTime-startTime)+"ms" + "]  ========");
+                if (OK){
+                    System.out.println("======== 文件接收成功 [File Name：" + fileName + "] ========");
+                    System.out.println("======== 文件接收成功 [Size：" + getFormatFileSize(fileLength) + "] ========");
+                    System.out.println("======== 文件接收成功 [File Address：" + address + "]  ========");
+                    
+                    // 发送给客户端的消息 
+                    PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
+                    out.println("Send file "+fileName+" successfully!");
+                    out.flush();
+                    System.out.println("======== 反馈成功 ========");
+                }
+                else {
+                    System.out.println("======== 文件接收失败 ========");
+                    PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),true);
+                    out.println("Send file "+fileName+" failed!");
+                    out.flush();
+                    System.out.println("======== 反馈成功 ========");
+                }
+               
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -158,7 +163,6 @@ public class FileTransferServer extends ServerSocket {
  
     /**
      * 入口
-     * @param args
      */
     public static void main(String[] args) {
         try {

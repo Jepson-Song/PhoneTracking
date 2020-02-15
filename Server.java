@@ -8,14 +8,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Calendar;
 
-//mpos   server  tool
-
  /*
 javac -encoding UTF-8 Server.java
 java Server
  */
- /*
- stroe*************************************
+
+ /**
+ * Created by Jepson on 2020/1/15.
  */
 public class Server extends ServerSocket {
 	public static final int SERVERPORT = 8896;

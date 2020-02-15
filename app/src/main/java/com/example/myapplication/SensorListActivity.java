@@ -11,6 +11,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
+/**
+ * Created by Jepson on 2019/12/30.
+ */
 public class SensorListActivity extends AppCompatActivity {
     private static final String TAG = "SensorListActivity";
 
