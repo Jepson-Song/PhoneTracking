@@ -125,7 +125,7 @@ public class FileTransferServer extends ServerSocket {
                     out.flush();
                     System.out.println("======== 反馈成功 ========");
                 }
-               
+                System.out.println(fileName.substring(0,fileName.length()-4));
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

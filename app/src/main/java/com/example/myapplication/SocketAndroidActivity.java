@@ -54,7 +54,10 @@ public class SocketAndroidActivity extends AppCompatActivity {
 
     private SharedPreferences sp;
 
-    private String WavFileName;
+    private String wavName = "null";
+    private String accName = "null";
+    private String graName = "null";
+    private String gyrName = "null";
 
     private boolean isTest = false;
 
@@ -74,9 +77,12 @@ public class SocketAndroidActivity extends AppCompatActivity {
         etPort.setText("8896");
 
         etFileAddress = (EditText)findViewById(R.id.etFileAddress);
-        sp = getSharedPreferences("User", Context.MODE_PRIVATE);;
-        WavFileName = sp.getString("WavFileName", "null");
-        etFileAddress.setText(WavFileName);
+        sp = getSharedPreferences("User", Context.MODE_PRIVATE);
+        wavName = sp.getString("wavName", "null");
+        accName = sp.getString("accName", "null");
+        graName = sp.getString("graName", "null");
+        gyrName = sp.getString("gyrName", "null");
+        etFileAddress.setText(wavName);
 
         btSend.setOnClickListener(new View.OnClickListener() {
 
@@ -145,9 +151,9 @@ public class SocketAndroidActivity extends AppCompatActivity {
             } else if (msg.what == AVGDELTATIME) {
                 Toast.makeText(SocketAndroidActivity.this, "avgDeltaTime:"+avgDeltaTime, Toast.LENGTH_SHORT).show();
             } else if (msg.what == FILESENDING) {
-                tvRecieve.append("\nFile "+WavFileName+" sending...");
+                tvRecieve.append("\nFile "+wavName+" sending...");
             } else if (msg.what == FILESENDDONE) {
-                tvRecieve.append("\nsend file "+WavFileName+" successfully!");
+                tvRecieve.append("\nsend file "+wavName+" successfully!");
             }
 
 
@@ -159,17 +165,27 @@ public class SocketAndroidActivity extends AppCompatActivity {
         @Override
         public void run(){
             try {
-                //tvRecieve.append("\nFile "+WavFileName+" sending...");
+                //tvRecieve.append("\nFile "+wavName+" sending...");
                 Message msg = new Message();
                 msg.what = FILESENDING;
                 handler.sendMessage(msg);
 
-                FileTransferClient ftc = new FileTransferClient(addStr, 8899, WavFileName);
+                FileTransferClient ftc;
+
+                ftc = new FileTransferClient(addStr, 8899, accName);
                 ftc.sendFile();
+                ftc = new FileTransferClient(addStr, 8899, graName);
+                ftc.sendFile();
+                ftc = new FileTransferClient(addStr, 8899, gyrName);
+                ftc.sendFile();
+
+                ftc = new FileTransferClient(addStr, 8899, wavName);
+                ftc.sendFile();
+
             } catch (Exception e){
                 e.printStackTrace();
             }
-            //tvRecieve.append("\nsend file "+WavFileName+" successfully!");
+            //tvRecieve.append("\nsend file "+wavName+" successfully!");
         }
     }
 

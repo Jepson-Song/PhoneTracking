@@ -3,7 +3,6 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.Sensor;
@@ -20,11 +19,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Jepson on 2019/12/25.
@@ -37,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView tvAccelerometer, tvGravity, tvGyroscope, tvTime;
     private Button btAllSensors, btSocket, btStart, btPlay, btTime, btStartTime, btJni;
     private EditText etStartTime;
-    private String fileName = "null";
+    private String wavName = "null";
     private boolean isRecording = false;
     private boolean isWaiting = false;
     private boolean isPlaying = false;
@@ -45,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final String color1 = "#9BA8A8";
     private static final String color2 = "#00CCCC";
     private static final String color3 = "#4EBABA";
-    private IntentFilter intentFilter;
 
     private SharedPreferences sp;
     private double avgDeltaTime;
@@ -58,18 +64,37 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final int STARTRECORD = 1;
     private static final int WAITRECORD = 2;
 
-    public String newFileName() {
+    private float accData[] = new float[3];
+    private float graData[] = new float[3];
+    private float gyrData[] = new float[3];
+
+    private Timer timer;
+
+    ArrayList<Float> accList = new ArrayList<Float>();
+    ArrayList<Float> graList = new ArrayList<Float>();
+    ArrayList<Float> gyrList = new ArrayList<Float>();
+
+    private String name = "null";
+    private String accName = "null";
+    private String graName = "null";
+    private String gyrName = "null";
+
+    public void newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
 
         String s = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
-        return mFileName += "/test/rcd_" + s + ".wav";
-    }
 
+        wavName =  mFileName + "/test/rcd_" + s + ".wav";
+        accName =  mFileName + "/test/rcd_" + s + ".acc";
+        graName =  mFileName + "/test/rcd_" + s + ".gra";
+        gyrName =  mFileName + "/test/rcd_" + s + ".gyr";
+    }
+/*
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         String str = data.getStringExtra("data");
         tvTime.setText(str);
-    }
+    }*/
 
     private void startRecord(){
         btStart.setText("STOP");
@@ -77,10 +102,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btStart.setBackgroundColor(Color.parseColor(color2));
         btStartTime.setBackgroundColor(Color.parseColor(color2));
 
-        fileName = newFileName();
-        mAudioRecorder = new MyAudioRecorder(fileName);
+        newFileName();
+        mAudioRecorder = new MyAudioRecorder(wavName);
         mAudioRecorder.startRecord();
+
+        startCollect();
     }
+
     private void stopRecord(){
         btStart.setText("START");
         btStartTime.setText("START2");
@@ -89,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         mAudioRecorder.stopRecord();
 
+        stopCollect();
         /**
          * 获取SharedPreferenced对象
          * 第一个参数是生成xml的文件名
@@ -98,7 +127,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //获取到edit对象
         SharedPreferences.Editor editor = sp.edit();
         //通过editor对象写入数据
-        editor.putString("WavFileName", fileName);
+        editor.putString("wavName", wavName);
+        editor.putString("accName", accName);
+        editor.putString("graName", graName);
+        editor.putString("gyrName", gyrName);
         //提交数据存入到xml文件中
         editor.commit();
     }
@@ -112,12 +144,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     private void startPlay(){
-        Toast.makeText(MainActivity.this, fileName, Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, wavName, Toast.LENGTH_SHORT).show();
         btPlay.setText("STOP");
         isPlaying = !isPlaying;
         btPlay.setBackgroundColor(Color.parseColor(color2));
 
-        mAudioPlayer = new MyAudioPlayer(btPlay, fileName);
+        mAudioPlayer = new MyAudioPlayer(btPlay, wavName);
         mAudioPlayer.startPlay();
     }
 
@@ -270,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(fileName == "null"){
+                if(wavName == "null"){
                     Toast.makeText(MainActivity.this, "NO SOUND RECORDER!", Toast.LENGTH_SHORT).show();
                 }
                 else if(!isPlaying){
@@ -286,6 +318,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         /**
          * 调用C程序
          */
+        /*
         btJni = (Button)findViewById(R.id.btJni);
         btJni.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -293,6 +326,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 tvTime.setText(jni.JniPlug.getNativeSring(1, 2));
             }
         });
+         */
 
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE); //获取系统传感器服务权限
 
@@ -310,14 +344,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             case Sensor.TYPE_ACCELEROMETER:
                 String contentAccelerometer = "加速度传感器：   \n"+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
                 tvAccelerometer.setText(contentAccelerometer);
+                accData[0] = event.values[0];
+                accData[1] = event.values[1];
+                accData[2] = event.values[2];
                 break;
             case Sensor.TYPE_GRAVITY:
                 String contentGravity = "重力传感器：   \n"+"x:"+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
                 tvGravity.setText(contentGravity);
+                graData[0] = event.values[0];
+                graData[1] = event.values[1];
+                graData[2] = event.values[2];
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 String contentGyroscope = "陀螺仪：   \n"+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
                 tvGyroscope.setText(contentGyroscope);
+                gyrData[0] = event.values[0];
+                gyrData[1] = event.values[1];
+                gyrData[2] = event.values[2];
                 break;
             default:
                 break;
@@ -343,10 +386,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onResume() {
         super.onResume();
 
+        /*
+         * 第一个参数：SensorEventListener接口的实例对象
+         * 第二个参数：需要注册的传感器实例
+         * 第三个参数：传感器获取传感器事件event值频率：
+         *              SensorManager.SENSOR_DELAY_FASTEST = 0：对应0微秒的更新间隔，最快，1微秒 = 1 % 1000000秒
+         *              SensorManager.SENSOR_DELAY_GAME = 1：对应20000微秒的更新间隔，游戏中常用
+         *              SensorManager.SENSOR_DELAY_UI = 2：对应60000微秒的更新间隔
+         *              SensorManager.SENSOR_DELAY_NORMAL = 3：对应200000微秒的更新间隔
+         *              键入自定义的int值x时：对应x微秒的更新间隔
+         *
+         */
         //注册加速度传感器
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),//传感器TYPE类型
-                SensorManager.SENSOR_DELAY_UI);//采集频率
+                SensorManager.SENSOR_DELAY_FASTEST);//采集频率
         //注册重力传感器
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
@@ -354,8 +408,55 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //注册陀螺仪
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
-                SensorManager.SENSOR_DELAY_NORMAL);
+                SensorManager.SENSOR_DELAY_FASTEST);
 
+    }
+
+    private void startCollect(){
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                accList.add(accData[0]);accList.add(accData[1]);accList.add(accData[2]);
+                graList.add(graData[0]);graList.add(graData[1]);graList.add(graData[2]);
+                gyrList.add(gyrData[0]);gyrList.add(gyrData[1]);gyrList.add(gyrData[2]);
+            }
+        },0,1);
+    }
+
+    private void stopCollect(){
+        //销毁timer
+        timer.cancel();
+        timer = null;
+
+        //将传感器数据写入文件
+        try {
+            write2File(accList, accName);
+            write2File(graList, graName);
+            write2File(gyrList, gyrName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void write2File(List<Float> dataList, String path) throws Exception{
+        File file = new File(path);
+        //如果没有文件就创建
+        if (!file.isFile()) {
+            file.createNewFile();
+        }
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+
+
+        for (int i = 0; i < dataList.size(); i++){
+            writer.write(dataList.get(i) + " ");
+            if(i%3 == 0) {
+                writer.write("\n");
+            }
+        }
+        writer.close();
     }
 
     /**
