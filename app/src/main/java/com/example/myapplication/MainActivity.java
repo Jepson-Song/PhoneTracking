@@ -79,6 +79,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private String graName = "null";
     private String gyrName = "null";
 
+    private int collectNum = 0;
+    private int sensorChangeNum = 0;
+    private boolean isCollect = false;
+
+    private int startTime = 0;
+    private int stopTime = 0;
+
+    final private int collectPeriod = 10;
+
     public void newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
 
@@ -89,14 +98,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         graName =  mFileName + "/test/rcd_" + s + ".gra";
         gyrName =  mFileName + "/test/rcd_" + s + ".gyr";
     }
-/*
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        String str = data.getStringExtra("data");
-        tvTime.setText(str);
-    }*/
 
     private void startRecord(){
+        startTime = getTodayMS();
+
         btStart.setText("STOP");
         btStartTime.setText("STOP");
         btStart.setBackgroundColor(Color.parseColor(color2));
@@ -107,9 +112,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mAudioRecorder.startRecord();
 
         startCollect();
+
     }
 
     private void stopRecord(){
+        stopTime = getTodayMS();
+
         btStart.setText("START");
         btStartTime.setText("START2");
         btStart.setBackgroundColor(Color.parseColor(color1));
@@ -141,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         btStart.setBackgroundColor(Color.parseColor(color3));
         btStartTime.setBackgroundColor(Color.parseColor(color3));
     }
-
 
     private void startPlay(){
         Toast.makeText(MainActivity.this, wavName, Toast.LENGTH_SHORT).show();
@@ -347,6 +354,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 accData[0] = event.values[0];
                 accData[1] = event.values[1];
                 accData[2] = event.values[2];
+                if(isCollect){
+                    sensorChangeNum ++;
+
+                    accList.add(accData[0]);accList.add(accData[1]);accList.add(accData[2]);
+                    collectNum ++;
+                }
                 break;
             case Sensor.TYPE_GRAVITY:
                 String contentGravity = "重力传感器：   \n"+"x:"+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
@@ -354,6 +367,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 graData[0] = event.values[0];
                 graData[1] = event.values[1];
                 graData[2] = event.values[2];
+                if(isCollect){
+                    graList.add(graData[0]);graList.add(graData[1]);graList.add(graData[2]);
+                }
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 String contentGyroscope = "陀螺仪：   \n"+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
@@ -361,6 +377,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 gyrData[0] = event.values[0];
                 gyrData[1] = event.values[1];
                 gyrData[2] = event.values[2];
+                if(isCollect){
+                    gyrList.add(gyrData[0]);gyrList.add(gyrData[1]);gyrList.add(gyrData[2]);
+                }
                 break;
             default:
                 break;
@@ -390,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
          * 第一个参数：SensorEventListener接口的实例对象
          * 第二个参数：需要注册的传感器实例
          * 第三个参数：传感器获取传感器事件event值频率：
-         *              SensorManager.SENSOR_DELAY_FASTEST = 0：对应0微秒的更新间隔，最快，1微秒 = 1 % 1000000秒
+         *              SensorManager.SENSOR_DELAY_FASTEST = 0：对应10000微秒的更新间隔，最快
          *              SensorManager.SENSOR_DELAY_GAME = 1：对应20000微秒的更新间隔，游戏中常用
          *              SensorManager.SENSOR_DELAY_UI = 2：对应60000微秒的更新间隔
          *              SensorManager.SENSOR_DELAY_NORMAL = 3：对应200000微秒的更新间隔
@@ -400,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //注册加速度传感器
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),//传感器TYPE类型
-                SensorManager.SENSOR_DELAY_FASTEST);//采集频率
+                10000);//SensorManager.SENSOR_DELAY_FASTEST);//采集频率
         //注册重力传感器
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
@@ -413,21 +432,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void startCollect(){
-        timer = new Timer();
+        collectNum = 0;
+        sensorChangeNum = 0;
+
+        isCollect = true;
+
+        /*timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 accList.add(accData[0]);accList.add(accData[1]);accList.add(accData[2]);
                 graList.add(graData[0]);graList.add(graData[1]);graList.add(graData[2]);
                 gyrList.add(gyrData[0]);gyrList.add(gyrData[1]);gyrList.add(gyrData[2]);
+                collectNum ++;
             }
-        },0,1);
+        },0,collectPeriod);*/
+
     }
 
     private void stopCollect(){
+        isCollect = false;
+
         //销毁timer
-        timer.cancel();
-        timer = null;
+        /*timer.cancel();
+        timer = null;*/
 
         //将传感器数据写入文件
         try {
@@ -437,6 +465,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+        Log.e(TAG, "stopCollect: continueTime: "+ (stopTime-startTime) );
+
+        Log.e(TAG, "stopCollect: collectNum: " + collectNum );
+
+        Log.e(TAG, "stopCollect: sensorChangeNum: " + sensorChangeNum );
 
     }
 
@@ -452,11 +487,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         for (int i = 0; i < dataList.size(); i++){
             writer.write(dataList.get(i) + " ");
-            if(i%3 == 0) {
+            if((i+1)%3 == 0) {
                 writer.write("\n");
             }
         }
         writer.close();
+    }
+
+    private int getTodayMS(){
+        Calendar calendar = Calendar.getInstance();
+        int h = calendar.get(Calendar.HOUR);
+        int m = calendar.get(Calendar.MINUTE);
+        int s = calendar.get(Calendar.SECOND);
+        int ms = calendar.get(Calendar.MILLISECOND);
+        int res = ((h*60+m)*60+s)*1000+ms;
+        return res;
     }
 
     /**
