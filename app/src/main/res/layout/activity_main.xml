@@ -12,7 +12,7 @@
         android:id="@+id/tvTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="36dp"
         android:text="Hello World!"
         android:textColor="#00ff00"
         android:textSize="24sp"
@@ -25,9 +25,9 @@
         android:id="@+id/btAllSensors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginLeft="56dp"
-        android:layout_marginTop="116dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="96dp"
         android:text="All Sensors"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -36,9 +36,9 @@
         android:id="@+id/btSocket"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="116dp"
-        android:layout_marginEnd="60dp"
-        android:layout_marginRight="60dp"
+        android:layout_marginTop="96dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginRight="64dp"
         android:text="SOCKET"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -49,12 +49,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="236dp"
-        android:layout_marginBottom="198dp"
+        android:layout_marginTop="186dp"
+        android:layout_marginBottom="298dp"
         android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/etStartTime"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/tvGyroscope"
@@ -119,16 +119,13 @@
 
     <EditText
         android:id="@+id/etStartTime"
-        android:layout_width="101dp"
-        android:layout_height="54dp"
-        android:layout_marginStart="150dp"
-        android:layout_marginLeft="150dp"
-        android:layout_marginEnd="39dp"
-        android:layout_marginRight="39dp"
-        android:layout_marginBottom="24dp"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="25dp"
         app:layout_constraintBottom_toTopOf="@+id/btStartTime"
-        app:layout_constraintEnd_toStartOf="@+id/btJni"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/tvStartTime" />
 
     <Button
         android:id="@+id/btStartTime"
@@ -139,6 +136,38 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btPlay"
         app:layout_constraintStart_toEndOf="@+id/btStart" />
+
+    <TextView
+        android:id="@+id/tvSamplePerod"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="15dp"
+        android:text="采集周期"
+        app:layout_constraintBottom_toTopOf="@+id/tvStartTime"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/etSamplePeriod"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="15dp"
+        app:layout_constraintBottom_toTopOf="@+id/etStartTime"
+        app:layout_constraintStart_toEndOf="@+id/tvSamplePerod" />
+
+    <TextView
+        android:id="@+id/tvStartTime"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="15dp"
+        android:text="开始时间"
+        app:layout_constraintBottom_toTopOf="@+id/btStart"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

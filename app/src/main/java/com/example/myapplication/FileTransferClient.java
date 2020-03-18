@@ -85,7 +85,7 @@ public class FileTransferClient extends Socket {
                     dos.write(bytes, 0, length);
                     dos.flush();
                     progress += length;
-                    Log.d("myerror", String.format("传输进度： | %.3f%% |", 100.0*progress/file.length()) );
+                    //Log.d("myerror", String.format("传输进度： | %.3f%% |", 100.0*progress/file.length()) );
                 }
                 Log.e("myerror",  "======== 文件传输成功 ========");
 

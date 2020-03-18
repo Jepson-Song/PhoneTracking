@@ -4,13 +4,15 @@ import java.io.FileOutputStream;
 import java.math.RoundingMode;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.DecimalFormat;import java.io.BufferedReader;
+import java.text.DecimalFormat;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
  
  /*
+cd MyApplication
 javac -encoding UTF-8 FileTransferServer.java
 java FileTransferServer
  */
@@ -93,7 +95,7 @@ public class FileTransferServer extends ServerSocket {
                 long progress = 0;
                 long startTime=System.currentTimeMillis();   //获取开始时间
                 boolean OK = false;
-                while((length = dis.read(bytes, 0, bytes.length)) != -1) {
+                while(fileLength!=0 && (length = dis.read(bytes, 0, bytes.length)) != -1) {
                     //System.out.println(new String(bytes));
                     fos.write(bytes, 0, length);
                     fos.flush();

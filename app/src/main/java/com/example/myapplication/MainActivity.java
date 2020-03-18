@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager mSensorManager;
     private TextView tvAccelerometer, tvGravity, tvGyroscope, tvTime;
     private Button btAllSensors, btSocket, btStart, btPlay, btTime, btStartTime, btJni;
-    private EditText etStartTime;
+    private EditText etStartTime, etSamplePeriod;
     private String wavName = "null";
     private boolean isRecording = false;
     private boolean isWaiting = false;
@@ -87,16 +87,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int stopTime = 0;
 
     final private int collectPeriod = 10;
+    private int samplePeriod = 10000;
+
+    private String timName = "null";
+    ArrayList<Long> timList = new ArrayList<Long>();
+
+    private float magData[] = new float[3];
+    private float oriData[] = new float[3];
+
+    private String oriName = "null";
+    ArrayList<Float> oriList = new ArrayList<Float>();
+    private float iniOriData[] = new float[3];
 
     public void newFileName() {
         String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
 
         String s = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
 
-        wavName =  mFileName + "/test/rcd_" + s + ".wav";
-        accName =  mFileName + "/test/rcd_" + s + ".acc";
-        graName =  mFileName + "/test/rcd_" + s + ".gra";
-        gyrName =  mFileName + "/test/rcd_" + s + ".gyr";
+        wavName = mFileName + "/test/rcd_" + s + ".wav";
+        accName = mFileName + "/test/rcd_" + s + ".acc";
+        graName = mFileName + "/test/rcd_" + s + ".gra";
+        gyrName = mFileName + "/test/rcd_" + s + ".gyr";
+        timName = mFileName + "/test/rcd_" + s + ".tim";
+        oriName = mFileName + "/test/rcd_" + s + ".ori";
     }
 
     private void startRecord(){
@@ -139,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         editor.putString("accName", accName);
         editor.putString("graName", graName);
         editor.putString("gyrName", gyrName);
+        editor.putString("timName", timName);
+        editor.putString("oriName", oriName);
         //提交数据存入到xml文件中
         editor.commit();
     }
@@ -343,44 +358,47 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         tvTime = (TextView)findViewById(R.id.tvTime);
 
+        etSamplePeriod = (EditText)findViewById(R.id.etSamplePeriod);
+        etSamplePeriod.setText(samplePeriod+"");
+
     }
 
     @Override
     public void onSensorChanged(SensorEvent event){
         switch (event.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
-                String contentAccelerometer = "加速度传感器：   \n"+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
-                tvAccelerometer.setText(contentAccelerometer);
-                accData[0] = event.values[0];
-                accData[1] = event.values[1];
-                accData[2] = event.values[2];
-                if(isCollect){
+                //String contentAccelerometer = "加速度传感器："+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
+                //tvAccelerometer.setText(contentAccelerometer);
+                accData = event.values.clone();
+                /*if(isCollect){
                     sensorChangeNum ++;
 
                     accList.add(accData[0]);accList.add(accData[1]);accList.add(accData[2]);
+                    //Long nanoTime = System.nanoTime();
+                    //timList.add(nanoTime);
                     collectNum ++;
                 }
+                calculateOrientation();*/
                 break;
             case Sensor.TYPE_GRAVITY:
-                String contentGravity = "重力传感器：   \n"+"x:"+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
-                tvGravity.setText(contentGravity);
-                graData[0] = event.values[0];
-                graData[1] = event.values[1];
-                graData[2] = event.values[2];
-                if(isCollect){
+                //String contentGravity = "重力传感器："+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
+                //tvGravity.setText(contentGravity);
+                graData = event.values.clone();
+                /*if(isCollect){
                     graList.add(graData[0]);graList.add(graData[1]);graList.add(graData[2]);
-                }
+                }*/
                 break;
             case Sensor.TYPE_GYROSCOPE:
-                String contentGyroscope = "陀螺仪：   \n"+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
-                tvGyroscope.setText(contentGyroscope);
-                gyrData[0] = event.values[0];
-                gyrData[1] = event.values[1];
-                gyrData[2] = event.values[2];
-                if(isCollect){
+                //String contentGyroscope = "陀螺仪："+outputFormat(event.values[0], event.values[1], event.values[2])+"\n";
+                //tvGyroscope.setText(contentGyroscope);
+                gyrData = event.values.clone();
+                /*if(isCollect){
                     gyrList.add(gyrData[0]);gyrList.add(gyrData[1]);gyrList.add(gyrData[2]);
-                }
+                }*/
                 break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                magData = event.values.clone();
+                //calculateOrientation();
             default:
                 break;
         }
@@ -389,6 +407,71 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy){
 
+    }
+
+    private void calculateOrientation(){
+        float[] values = new float[3];
+        float[] R = new float[9];
+
+        SensorManager.getRotationMatrix(R, null, accData, magData);
+        SensorManager.getOrientation(R, values);
+
+        // 要经过一次数据格式的转换，转换为度
+        /*oriData[0] = (float) Math.toDegrees(values[0]);
+        Log.i(TAG, values[0]+"");
+        oriData[1] = (float) Math.toDegrees(values[1]);
+        oriData[2] = (float) Math.toDegrees(values[2]);*/
+
+
+
+        if(isCollect){
+            oriData = values.clone();
+            if(oriData[0] < 0) {
+                oriData[0] += 2*3.1415926535897932384626;
+            }
+            oriList.add(oriData[0]);
+            //oriList.add(oriData[1]);
+            //oriList.add(oriData[2]);
+
+            Long nanoTime = System.nanoTime();
+            timList.add(nanoTime);
+
+            /*String contentOri = "相对方向："+(oriData[0]-iniOriData[0])+" "+
+                    (oriData[1]-iniOriData[1])+" "+(oriData[2]-iniOriData[2])+"\n";
+            tvGyroscope.setText(contentOri);*/
+        } else {
+            iniOriData = values.clone();
+
+            /*String contentIniOri = "初始方向："+iniOriData[0]+" "+ iniOriData[1]+" "+iniOriData[2]+"\n";
+            tvGravity.setText(contentIniOri);*/
+        }
+
+        /*
+        if(values[0] >= -5 && values[0] < 5){
+            Log.i(TAG, "正北");
+        }
+        else if(values[0] >= 5 && values[0] < 85){
+            Log.i(TAG, "东北");
+        }
+        else if(values[0] >= 85 && values[0] <=95){
+            Log.i(TAG, "正东");
+        }
+        else if(values[0] >= 95 && values[0] <175){
+            Log.i(TAG, "东南");
+        }
+        else if((values[0] >= 175 && values[0] <= 180) || (values[0]) >= -180 && values[0] < -175){
+            Log.i(TAG, "正南");
+        }
+        else if(values[0] >= -175 && values[0] <-95){
+            Log.i(TAG, "西南");
+        }
+        else if(values[0] >= -95 && values[0] < -85){
+            Log.i(TAG, "正西");
+        }
+        else if(values[0] >= -85 && values[0] <-5) {
+            Log.i(TAG, "西北");
+        }
+        */
     }
 
     private NumberFormat formatter = new DecimalFormat("0.000000");
@@ -405,6 +488,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onResume() {
         super.onResume();
 
+        samplePeriod = Integer.parseInt(etSamplePeriod.getText().toString());
         /*
          * 第一个参数：SensorEventListener接口的实例对象
          * 第二个参数：需要注册的传感器实例
@@ -419,15 +503,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //注册加速度传感器
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),//传感器TYPE类型
-                10000);//SensorManager.SENSOR_DELAY_FASTEST);//采集频率
+                samplePeriod);//SensorManager.SENSOR_DELAY_FASTEST);//采集频率
         //注册重力传感器
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
-                SensorManager.SENSOR_DELAY_FASTEST);
+                samplePeriod);
         //注册陀螺仪
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
-                SensorManager.SENSOR_DELAY_FASTEST);
+                samplePeriod);
+        //注册磁场传感器
+        mSensorManager.registerListener(this,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                samplePeriod);
+
+        //calculateOrientation();
 
     }
 
@@ -437,16 +527,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         isCollect = true;
 
-        /*timer = new Timer();
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 accList.add(accData[0]);accList.add(accData[1]);accList.add(accData[2]);
-                graList.add(graData[0]);graList.add(graData[1]);graList.add(graData[2]);
-                gyrList.add(gyrData[0]);gyrList.add(gyrData[1]);gyrList.add(gyrData[2]);
+                //graList.add(graData[0]);graList.add(graData[1]);graList.add(graData[2]);
+                //gyrList.add(gyrData[0]);gyrList.add(gyrData[1]);gyrList.add(gyrData[2]);
+                calculateOrientation();
+
                 collectNum ++;
             }
-        },0,collectPeriod);*/
+        },0, collectPeriod);
 
     }
 
@@ -462,6 +554,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             write2File(accList, accName);
             write2File(graList, graName);
             write2File(gyrList, gyrName);
+            tim2File(timList, timName);
+            ori2File(oriList, oriName);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -481,7 +575,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (!file.isFile()) {
             file.createNewFile();
         }
-
+        if (dataList.size() == 0){
+            return ;
+        }
         BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
 
@@ -490,6 +586,49 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             if((i+1)%3 == 0) {
                 writer.write("\n");
             }
+        }
+        writer.close();
+    }
+
+    private void tim2File(List<Long> dataList, String path) throws Exception{
+        File file = new File(path);
+        //如果没有文件就创建
+        if (!file.isFile()) {
+            file.createNewFile();
+        }
+
+        if (dataList.size() == 0){
+            return ;
+        }
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+
+
+        for (int i = 0; i < dataList.size(); i++){
+            writer.write(dataList.get(i) + "");
+            //if((i+1)%3 == 0) {
+            writer.write("\n");
+            //}
+        }
+        writer.close();
+    }
+    private void ori2File(List<Float> dataList, String path) throws Exception{
+        File file = new File(path);
+        //如果没有文件就创建
+        if (!file.isFile()) {
+            file.createNewFile();
+        }
+        if (dataList.size() == 0){
+            return ;
+        }
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+
+
+        for (int i = 0; i < dataList.size(); i++){
+            writer.write(dataList.get(i) + "");
+            //if((i+1)%3 == 0) {
+            writer.write("\n");
+            //}
         }
         writer.close();
     }
@@ -510,7 +649,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onPause() {
         super.onPause();
-        mSensorManager.unregisterListener(this);
+        if(mSensorManager != null){
+            mSensorManager.unregisterListener(this);
+        }
+
     }
 
     @Override

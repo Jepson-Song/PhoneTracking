@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.Calendar;
 
  /*
+cd MyApplication
 javac -encoding UTF-8 Server.java
 java Server
  */

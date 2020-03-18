@@ -58,6 +58,8 @@ public class SocketAndroidActivity extends AppCompatActivity {
     private String accName = "null";
     private String graName = "null";
     private String gyrName = "null";
+    private String timName = "null";
+    private String oriName = "null";
 
     private boolean isTest = false;
 
@@ -82,6 +84,8 @@ public class SocketAndroidActivity extends AppCompatActivity {
         accName = sp.getString("accName", "null");
         graName = sp.getString("graName", "null");
         gyrName = sp.getString("gyrName", "null");
+        timName = sp.getString("timName", "null");
+        oriName = sp.getString("oriName", "null");
         etFileAddress.setText(wavName);
 
         btSend.setOnClickListener(new View.OnClickListener() {
@@ -177,6 +181,10 @@ public class SocketAndroidActivity extends AppCompatActivity {
                 ftc = new FileTransferClient(addStr, 8899, graName);
                 ftc.sendFile();
                 ftc = new FileTransferClient(addStr, 8899, gyrName);
+                ftc.sendFile();
+                ftc = new FileTransferClient(addStr, 8899, timName);
+                ftc.sendFile();
+                ftc = new FileTransferClient(addStr, 8899, oriName);
                 ftc.sendFile();
 
                 ftc = new FileTransferClient(addStr, 8899, wavName);
