@@ -113,6 +113,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void startRecord(){
+
+        accList.clear();
+        graList.clear();
+        gyrList.clear();
+        timList.clear();
+        oriList.clear();
+
         startTime = getTodayMS();
 
         btStart.setText("STOP");
@@ -546,8 +553,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         isCollect = false;
 
         //销毁timer
-        /*timer.cancel();
-        timer = null;*/
+        timer.cancel();
+        timer = null;
 
         //将传感器数据写入文件
         try {
