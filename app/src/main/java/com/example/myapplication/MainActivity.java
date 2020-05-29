@@ -437,8 +437,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 oriData[0] += 2*3.1415926535897932384626;
             }
             oriList.add(oriData[0]);
-            //oriList.add(oriData[1]);
-            //oriList.add(oriData[2]);
+            oriList.add(oriData[1]);
+            oriList.add(oriData[2]);
 
             Long nanoTime = System.nanoTime();
             timList.add(nanoTime);
@@ -453,32 +453,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             tvGravity.setText(contentIniOri);*/
         }
 
-        /*
-        if(values[0] >= -5 && values[0] < 5){
-            Log.i(TAG, "正北");
-        }
-        else if(values[0] >= 5 && values[0] < 85){
-            Log.i(TAG, "东北");
-        }
-        else if(values[0] >= 85 && values[0] <=95){
-            Log.i(TAG, "正东");
-        }
-        else if(values[0] >= 95 && values[0] <175){
-            Log.i(TAG, "东南");
-        }
-        else if((values[0] >= 175 && values[0] <= 180) || (values[0]) >= -180 && values[0] < -175){
-            Log.i(TAG, "正南");
-        }
-        else if(values[0] >= -175 && values[0] <-95){
-            Log.i(TAG, "西南");
-        }
-        else if(values[0] >= -95 && values[0] < -85){
-            Log.i(TAG, "正西");
-        }
-        else if(values[0] >= -85 && values[0] <-5) {
-            Log.i(TAG, "西北");
-        }
-        */
     }
 
     private NumberFormat formatter = new DecimalFormat("0.000000");
@@ -558,9 +532,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //将传感器数据写入文件
         try {
-            write2File(accList, accName);
-            write2File(graList, graName);
-            write2File(gyrList, gyrName);
+            acc2File(accList, accName);
+            acc2File(graList, graName);
+            acc2File(gyrList, gyrName);
             tim2File(timList, timName);
             ori2File(oriList, oriName);
         } catch (Exception e) {
@@ -576,7 +550,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    private void write2File(List<Float> dataList, String path) throws Exception{
+    private void acc2File(List<Float> dataList, String path) throws Exception{
         File file = new File(path);
         //如果没有文件就创建
         if (!file.isFile()) {
@@ -632,10 +606,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         for (int i = 0; i < dataList.size(); i++){
-            writer.write(dataList.get(i) + "");
-            //if((i+1)%3 == 0) {
-            writer.write("\n");
-            //}
+            writer.write(dataList.get(i) + " ");
+            if((i+1)%3 == 0) {
+               writer.write("\n");
+            }
         }
         writer.close();
     }
